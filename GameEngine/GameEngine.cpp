@@ -18,7 +18,7 @@ void processInput(GLFWwindow* window) {
 }
 
 // Vertex Shader: Stage one of graphics pipline
-void vertexShader() {
+void vertexShader(unsigned int &vertexShader) {
     int success;
     char infoLog[512];
     // Triangle
@@ -36,7 +36,7 @@ void vertexShader() {
         "gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
         "}\0";
 
-    unsigned int vertexShader;
+    vertexShader;
     // Allocate memory on GPU and assign a bufferID to the variable VBO.
     unsigned int VBO;
     
@@ -57,8 +57,23 @@ void vertexShader() {
     }
 }
 
-void fragmentShader() {
-
+void fragmentShader(unsigned int &fragmentShader) {
+    int success;
+    char infoLog[512];
+    const char* fragmentShaderSource = "#version 330 core\n"
+        "out vec4 FragColor;\n"
+        "void main()\n"
+        "{\n"
+        "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "}\0";
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        std::cout << "ERROR::FRAGMENTSHADER::COMPILATION::FAILED\n" << infoLog << endl;
+    }
 }
 int main()
 {
@@ -85,7 +100,10 @@ int main()
         return -1;
     }
   
-    vertexShader();
+    unsigned int vertexShader_;
+    unsigned int fragmentShader_;
+    vertexShader(vertexShader_);
+    fragmentShader(fragmentShader_);
 
     // A render loop so the window wont be closed immediately.
     while (!glfwWindowShouldClose(window)) {
