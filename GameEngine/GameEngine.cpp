@@ -75,6 +75,27 @@ void fragmentShader(unsigned int &fragmentShader) {
         std::cout << "ERROR::FRAGMENTSHADER::COMPILATION::FAILED\n" << infoLog << endl;
     }
 }
+
+void shaderProgram(unsigned int &shaderProgram, unsigned int &vertexShader, unsigned int &fragmentShader) {
+    int success;
+    char infoLog[512];
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    // Check program linking status.
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADERPROGRAM::COMPILATION::FAILED\n" << infoLog << endl;
+    }
+
+    // Delete the shaders after linking;
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+}
 int main()
 {
     glfwInit();
