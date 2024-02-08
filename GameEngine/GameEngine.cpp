@@ -18,7 +18,7 @@ void processInput(GLFWwindow* window) {
 }
 
 // Vertex Shader: Stage one of graphics pipline
-void vertexShader(unsigned int &vertexShader) {
+void vertexShader(unsigned int &vertexShader, unsigned int &VBO) {
     int success;
     char infoLog[512];
     // Triangle
@@ -37,8 +37,8 @@ void vertexShader(unsigned int &vertexShader) {
         "}\0";
 
     vertexShader;
-    // Allocate memory on GPU and assign a bufferID to the variable VBO.
-    unsigned int VBO;
+    
+    // Allocate memory on GPU and assign a bufferID to the variable VBO (Vertex Buffer Objects).
     
     glGenBuffers(1, &VBO);
 
@@ -96,6 +96,20 @@ void shaderProgram(unsigned int &shaderProgram, unsigned int &vertexShader, unsi
     glDeleteShader(fragmentShader);
 
 }
+
+void linkVertexAttributes(unsigned int &VBO) {
+    // Since our vertex shader is a vec3,so it has three values.
+    // For more info about this function call, check Page 34 on OpenGL.
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+}
+
+// VAO stands for Vertex Array Objects
+void generateVAO(unsigned int &VAO, unsigned int &VBO) {
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+}
+
 int main()
 {
     glfwInit();
@@ -123,8 +137,21 @@ int main()
   
     unsigned int vertexShader_;
     unsigned int fragmentShader_;
-    vertexShader(vertexShader_);
+    unsigned int shaderProgram_;
+    unsigned int VBO;
+    unsigned int VAO;
+
+    generateVAO(VAO, VBO);
+    vertexShader(vertexShader_, VBO);
     fragmentShader(fragmentShader_);
+    shaderProgram(shaderProgram_, vertexShader_, fragmentShader_);
+    
+    linkVertexAttributes(VBO);
+    
+
+    glUseProgram(shaderProgram_);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
 
     // A render loop so the window wont be closed immediately.
     while (!glfwWindowShouldClose(window)) {
@@ -132,9 +159,14 @@ int main()
         processInput(window);
 
         // rendering commands
-
+        
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // The order of this code matters.
+        glUseProgram(shaderProgram_);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents();
